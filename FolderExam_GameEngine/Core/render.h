@@ -43,7 +43,7 @@ bool inside;
 
         std::vector<glm::vec3> EnemyPos;
         std::vector<Entity> Enemies;
-        
+
 
      
         
