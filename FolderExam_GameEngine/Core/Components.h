@@ -133,7 +133,7 @@ struct mesh_component : public Components
     std::vector<Triangle> indices;
     std::vector<glm::vec3> corners;
 
-    mesh_component() :  VBO(0),VAO(0), EBO(0) { }
+    mesh_component() : VAO(0), VBO(0), EBO(0) { }
 
     ~mesh_component()
     {

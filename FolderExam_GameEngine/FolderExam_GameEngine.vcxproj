@@ -163,6 +163,7 @@
     <ClCompile Include="Core\Collision.cpp" />
     <ClCompile Include="Core\Components.cpp" />
     <ClCompile Include="Core\Model.cpp" />
+    <ClCompile Include="Core\ParticleSystem.cpp" />
     <ClCompile Include="Core\Plane.cpp" />
     <ClCompile Include="Core\Shaders.cpp" />
     <ClCompile Include="Core\Sphere.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="Core\Components.h" />
     <ClInclude Include="Core\Entity.h" />
     <ClInclude Include="Core\Model.h" />
+    <ClInclude Include="Core\ParticleSystem.h" />
     <ClInclude Include="Core\Plane.h" />
     <ClInclude Include="Core\render.h" />
     <ClInclude Include="Core\Setup.h" />

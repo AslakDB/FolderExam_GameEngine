@@ -180,13 +180,15 @@ struct movementSystem : public Systems
 
         size_t min_size = std::min(transforms.size(), movements.size());
 
-        for (size_t i = 0; i < min_size; ++i) {
-            auto& transform = transforms[i];
+        for (size_t i = 0; i < movements.size(); ++i) {
+            auto& transform = transforms[i + 1];
             auto& movement = movements[i];
 
             transform.PlayerPos += movement.Velocity  * deltatime;
-            
         }
+
+        
+        
     }
 
 };
@@ -208,6 +210,7 @@ struct HealthSystem : public Systems
         
     
 };
+
 
 struct matrix_system : public Systems
 {
@@ -241,6 +244,7 @@ struct matrix_system : public Systems
     }
     
 };
+
 
 
  struct render_system : Systems
