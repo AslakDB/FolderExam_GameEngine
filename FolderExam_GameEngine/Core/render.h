@@ -100,23 +100,7 @@ bool inside;
        // componentManager.getComponent<movement_component>(Sphere0.ID).Velocity = glm::vec3(2, 0, 0) ;
 
         
-        componentManager.add_component<model_component>(Plane0.ID);
-        componentManager.add_component<plane_component>(Plane0.ID);
-       // componentManager.add_component<mesh_component>(Plane0.ID);
-        componentManager.add_component<transform_component>(Plane0.ID);
-       // componentManager.add_component<movement_component>(Plane0.ID);
-        componentManager.add_component<matrix_component>(Plane0.ID);
-
         
-        componentManager.getComponent<model_component>(Plane0.ID).MeshName = "Plane";
-        componentManager.getComponent<model_component>(Plane0.ID).colour = glm::vec3(1.f);
-        componentManager.getComponent<transform_component>(Plane0.ID).Scale = glm::vec3(2, 1, 2);
-        componentManager.getComponent<transform_component>(Plane0.ID).PlayerPos = glm::vec3(0, 0, 0);
-        
-        
-        
-        
-
         componentManager.getComponent<transform_component>(Player.ID).PlayerPos = glm::vec3(0,0 , 2);
         componentManager.getComponent<transform_component>(Player.ID).Scale =  glm::vec3(0.5, 0.5,0.5);
 
@@ -150,7 +134,18 @@ bool inside;
         componentManager.getComponent<transform_component>(Enemy1.ID).Scale =  glm::vec3(0.5, 0.5,0.5);
         componentManager.getComponent<transform_component>(Enemy1.ID).PlayerPos = glm::vec3(3,0 , -2);
         
+        componentManager.add_component<model_component>(Plane0.ID);
+        componentManager.add_component<plane_component>(Plane0.ID);
+        // componentManager.add_component<mesh_component>(Plane0.ID);
+        componentManager.add_component<transform_component>(Plane0.ID);
+        // componentManager.add_component<movement_component>(Plane0.ID);
+        componentManager.add_component<matrix_component>(Plane0.ID);
+
         
+        componentManager.getComponent<model_component>(Plane0.ID).MeshName = "Plane";
+        componentManager.getComponent<model_component>(Plane0.ID).colour = glm::vec3(1.f);
+        componentManager.getComponent<transform_component>(Plane0.ID).Scale = glm::vec3(2, 1, 2);
+        componentManager.getComponent<transform_component>(Plane0.ID).PlayerPos = glm::vec3(0, 0, 0);
 
 
         // Setup sphere model radius
@@ -227,7 +222,7 @@ bool inside;
             systemManager.UpdateSystems<matrix_system>(shaderProgram, componentManager, deltaTime);
             
             systemManager.UpdateSystems<movementSystem>(shaderProgram,componentManager, deltaTime);
-           // collisionSystem.Update(shaderProgram, componentManager, deltaTime);
+            collisionSystem.Update(shaderProgram, componentManager, deltaTime);
             
             glfwSwapBuffers(window);
             glfwPollEvents();

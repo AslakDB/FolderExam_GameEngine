@@ -250,14 +250,17 @@ struct matrix_system : public Systems
  struct render_system : Systems
 {
     std::unordered_map<std::string, mesh_component> MeshMap;
-   
+     
+
+     glm::vec3 colour = glm::vec3(1.f);
     void CreateMeshes()
     {
         MeshMap["Sphere"];
-        CreateSphere(MeshMap["Sphere"], glm::vec3(0.f, 0.5f, 0.5f));
+        CreateSphere(MeshMap["Sphere"], glm::vec3(1.f, 0.f, 0.f));
         MeshMap["Plane"];
-        CreatePlane(MeshMap["Plane"], glm::vec3(0.5f, 0.f, 0.6f));
+        CreatePlane(MeshMap["Plane"], glm::vec3(0.6f,0.f,0.5f));
     }
+     
     void Update(unsigned int ShaderProgram, component_manager& componentManager, float deltatime) override
     {
         component_handler<model_component> *model_handler = componentManager.get_component_handler<model_component>();
@@ -269,16 +272,18 @@ struct matrix_system : public Systems
 
         auto& models = model_handler->Components;
         auto& matrices = matrix_handler->Components;
+        
 
         glUseProgram(ShaderProgram);
 
         // Ensure the sizes match or handle mismatches appropriately
         //size_t min_size = std::min(models.size(), matrices.size());
 
+        
         for (size_t i = 0; i < models.size(); ++i) {
             const auto& mesh = MeshMap[models[i].MeshName];
             const auto& matrix = matrices[i];
-
+            colour = models[i].colour;
             int modelLoc = glGetUniformLocation(ShaderProgram, "model");
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(matrix.ModelMatrix));
             glBindVertexArray(mesh.VAO);
