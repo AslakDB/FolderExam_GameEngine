@@ -34,7 +34,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
 void ProsessInput(GLFWwindow *window, float deltaTime, movement_component& MVM, Entity& Player);
 
-void CreateEnemy(int numOfEnemies);
+void CreateEnemy(int ID);
 
 struct Render {
 bool inside;
@@ -57,19 +57,14 @@ bool inside;
         */
 
         
-        /*
-        Entity Enemy0 = entityManager.create_entity();
-        if (Enemy0.ID == -1){std::cerr << "Failed to create enemy entity." << std::endl;}
-        Entity Enemy1 = entityManager.create_entity();
-       if (Enemy1.ID == -1){std::cerr << "Failed to create enemy entity." << std::endl;}
-       */
+        
         Entity Player(0);
         Entity Plane0(1);
-        Entity Enemy0(2);
-        Entity Enemy1(3);
         
-        /*Entity Plane0 = entityManager.create_entity();
-        if (Plane0.ID == -1){std::cerr << "Failed to create plane entity." << std::endl;}*/
+
+        CreateEnemy(2);
+        CreateEnemy(3);
+        
 
         
 
@@ -105,34 +100,20 @@ bool inside;
         componentManager.getComponent<transform_component>(Player.ID).Scale =  glm::vec3(0.5, 0.5,0.5);
 
         
-        componentManager.add_component<model_component>(Enemy0.ID);
-        componentManager.add_component<transform_component>(Enemy0.ID);
-        componentManager.add_component<movement_component>(Enemy0.ID);
-        componentManager.add_component<collision_component>(Enemy0.ID);
-        componentManager.add_component<mesh_component>(Enemy0.ID);
-        componentManager.add_component<sphere_component>(Enemy0.ID);
-        componentManager.add_component<matrix_component>(Enemy0.ID);
-        componentManager.add_component<health_component>(Enemy0.ID);
         
-        componentManager.getComponent<health_component>(Enemy0.ID).health = 2;
-        componentManager.getComponent<model_component>(Enemy0.ID).MeshName = "Sphere";
-        componentManager.getComponent<transform_component>(Enemy0.ID).Scale =  glm::vec3(0.5, 0.5,0.5);
-        componentManager.getComponent<transform_component>(Enemy0.ID).PlayerPos = glm::vec3(-3,0 , -2);
+        
+        componentManager.getComponent<health_component>(2).health = 2;
+        componentManager.getComponent<model_component>(2).MeshName = "Sphere";
+        componentManager.getComponent<transform_component>(2).Scale =  glm::vec3(0.5, 0.5,0.5);
+        componentManager.getComponent<transform_component>(2).PlayerPos = glm::vec3(-3,0 , -2);
 
 
-        componentManager.add_component<model_component>(Enemy1.ID);
-        componentManager.add_component<transform_component>(Enemy1.ID);
-        componentManager.add_component<movement_component>(Enemy1.ID);
-        componentManager.add_component<collision_component>(Enemy1.ID);
-        componentManager.add_component<mesh_component>(Enemy1.ID);
-        componentManager.add_component<sphere_component>(Enemy1.ID);
-        componentManager.add_component<matrix_component>(Enemy1.ID);
-        componentManager.add_component<health_component>(Enemy1.ID);
         
-        componentManager.getComponent<health_component>(Enemy1.ID).health = 2;
-        componentManager.getComponent<model_component>(Enemy1.ID).MeshName = "Sphere";
-        componentManager.getComponent<transform_component>(Enemy1.ID).Scale =  glm::vec3(0.5, 0.5,0.5);
-        componentManager.getComponent<transform_component>(Enemy1.ID).PlayerPos = glm::vec3(3,0 , -2);
+        
+        componentManager.getComponent<health_component>(3).health = 2;
+        componentManager.getComponent<model_component>(3).MeshName = "Sphere";
+        componentManager.getComponent<transform_component>(3).Scale =  glm::vec3(0.5, 0.5,0.5);
+        componentManager.getComponent<transform_component>(3).PlayerPos = glm::vec3(3,0 , -2);
         
         componentManager.add_component<model_component>(Plane0.ID);
         componentManager.add_component<plane_component>(Plane0.ID);
@@ -153,14 +134,14 @@ bool inside;
         sphereHandler->Components[sphereHandler->index[Player.ID]].radius = 0.5f;
       
         
-     Enemies.emplace_back(Enemy0);
-        Enemies.emplace_back(Enemy1);
+     Enemies.emplace_back(2);
+        Enemies.emplace_back(3);
 
         glm::mat4 trans = glm::mat4(1.0f);
         glm::mat4 projection;
 
-        EnemyPos.emplace_back(componentManager.getComponent<transform_component>(Enemy0.ID).PlayerPos);
-                   EnemyPos.emplace_back(componentManager.getComponent<transform_component>(Enemy1.ID).PlayerPos);
+        EnemyPos.emplace_back(componentManager.getComponent<transform_component>(2).PlayerPos);
+                   EnemyPos.emplace_back(componentManager.getComponent<transform_component>(3).PlayerPos);
 
        
         while (!glfwWindowShouldClose(window))
@@ -170,11 +151,11 @@ bool inside;
             
             
          
-            glm::vec3 Enemy0direction = glm::normalize(componentManager.getComponent<transform_component>(Player.ID).PlayerPos - componentManager.getComponent<transform_component>(Enemy0.ID).PlayerPos);
-            componentManager.getComponent<movement_component>(Enemy0.ID).Velocity = Enemy0direction * 0.5f;
+            glm::vec3 Enemy0direction = glm::normalize(componentManager.getComponent<transform_component>(Player.ID).PlayerPos - componentManager.getComponent<transform_component>(2).PlayerPos);
+            componentManager.getComponent<movement_component>(2).Velocity = Enemy0direction * 0.5f;
 
-            glm::vec3 Enemy1direction = glm::normalize(componentManager.getComponent<transform_component>(Player.ID).PlayerPos - componentManager.getComponent<transform_component>(Enemy1.ID).PlayerPos);
-            componentManager.getComponent<movement_component>(Enemy1.ID).Velocity = Enemy1direction * 0.5f;
+            glm::vec3 Enemy1direction = glm::normalize(componentManager.getComponent<transform_component>(Player.ID).PlayerPos - componentManager.getComponent<transform_component>(3).PlayerPos);
+            componentManager.getComponent<movement_component>(3).Velocity = Enemy1direction * 0.5f;
 
            
             if (componentManager.getComponent<health_component>(Player.ID).health <= 0)
@@ -185,8 +166,8 @@ bool inside;
 
             
 
-            EnemyPos[0] = componentManager.getComponent<transform_component>(Enemy0.ID).PlayerPos;
-            EnemyPos[1] = componentManager.getComponent<transform_component>(Enemy1.ID).PlayerPos;
+            EnemyPos[0] = componentManager.getComponent<transform_component>(2).PlayerPos;
+            EnemyPos[1] = componentManager.getComponent<transform_component>(3).PlayerPos;
             
 
             
@@ -318,4 +299,16 @@ void ProsessInput(GLFWwindow *window, float deltaTime, movement_component& MVM, 
     }
 }
 
+inline void CreateEnemy(int ID)
+{
+    Entity Enemy(ID);
+    componentManager.add_component<model_component>(Enemy.ID);
+    componentManager.add_component<transform_component>(Enemy.ID);
+    componentManager.add_component<movement_component>(Enemy.ID);
+    componentManager.add_component<collision_component>(Enemy.ID);
+    componentManager.add_component<mesh_component>(Enemy.ID);
+    componentManager.add_component<sphere_component>(Enemy.ID);
+    componentManager.add_component<matrix_component>(Enemy.ID);
+    componentManager.add_component<health_component>(Enemy.ID);
+}
 
