@@ -109,6 +109,7 @@ bool inside;
 
         
         componentManager.getComponent<model_component>(Plane0.ID).MeshName = "Plane";
+        componentManager.getComponent<model_component>(Plane0.ID).colour = glm::vec3(1.f);
         componentManager.getComponent<transform_component>(Plane0.ID).Scale = glm::vec3(2, 1, 2);
         componentManager.getComponent<transform_component>(Plane0.ID).PlayerPos = glm::vec3(0, 0, 0);
         
@@ -174,14 +175,13 @@ bool inside;
             
             
          
-            /*glm::vec3 Enemy0direction = glm::normalize(componentManager.getComponent<transform_component>(Player.ID).PlayerPos - componentManager.getComponent<transform_component>(Enemy0.ID).PlayerPos);
+            glm::vec3 Enemy0direction = glm::normalize(componentManager.getComponent<transform_component>(Player.ID).PlayerPos - componentManager.getComponent<transform_component>(Enemy0.ID).PlayerPos);
             componentManager.getComponent<movement_component>(Enemy0.ID).Velocity = Enemy0direction * 0.5f;
-            */
 
             glm::vec3 Enemy1direction = glm::normalize(componentManager.getComponent<transform_component>(Player.ID).PlayerPos - componentManager.getComponent<transform_component>(Enemy1.ID).PlayerPos);
             componentManager.getComponent<movement_component>(Enemy1.ID).Velocity = Enemy1direction * 0.5f;
-            
 
+           
             if (componentManager.getComponent<health_component>(Player.ID).health <= 0)
             {
                 std::cout << "Player is dead" << std::endl;

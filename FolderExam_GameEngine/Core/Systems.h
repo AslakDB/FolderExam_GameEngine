@@ -180,11 +180,11 @@ struct movementSystem : public Systems
 
         size_t min_size = std::min(transforms.size(), movements.size());
 
-        for (size_t i = 0; i < movements.size(); ++i) {
-            auto& transform = transforms[i + 1];
+        for (size_t i = 0; i < min_size; ++i) {
+            auto& transform = transforms[i];
             auto& movement = movements[i];
 
-            transform.PlayerPos += movement.Velocity  * deltatime;
+            transform.PlayerPos += movement.Velocity * deltatime;
         }
 
         
@@ -250,11 +250,11 @@ struct matrix_system : public Systems
  struct render_system : Systems
 {
     std::unordered_map<std::string, mesh_component> MeshMap;
-    
+   
     void CreateMeshes()
     {
         MeshMap["Sphere"];
-        CreateSphere(MeshMap["Sphere"], glm::vec3(0.6f));
+        CreateSphere(MeshMap["Sphere"], glm::vec3(0.f, 0.5f, 0.5f));
         MeshMap["Plane"];
         CreatePlane(MeshMap["Plane"], glm::vec3(0.5f, 0.f, 0.6f));
     }

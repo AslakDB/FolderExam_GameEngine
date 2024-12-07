@@ -180,5 +180,5 @@ struct mesh_component : public Components
 struct model_component : public Components
 {
     std::string MeshName;
-    glm::vec3 colour = glm::vec3(1.f);
+    glm::vec3 colour = glm::vec3(0.f);
 };
