@@ -89,6 +89,14 @@ struct transform_component : public Components
     glm::vec3 Scale = glm::vec3(1.f);
     glm::vec3 Rotation = glm::vec3(0.f);
 };
+
+struct DOD_transform_component : public Components
+{
+    std::vector<glm::vec3> PlayerPos;
+    std::vector<glm::vec3> Scale;
+    std::vector<glm::vec3> Rotation;
+};
+
 struct movement_component : public Components
 {
     glm::vec3 Velocity = glm::vec3(0.f);
@@ -97,7 +105,7 @@ struct movement_component : public Components
 
 struct health_component : public Components
 {
-    int health;
+   int health;
 };
 
 struct matrix_component : public Components

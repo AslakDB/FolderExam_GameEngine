@@ -174,7 +174,10 @@ struct movementSystem : public Systems
     {
         auto* transform_handler = componentManager.get_component_handler<transform_component>();
         auto* movement_handler = componentManager.get_component_handler<movement_component>();
+        auto* DOD_transform_handler = componentManager.get_component_handler<DOD_transform_component>();
+        
 
+        auto& DOD_transforms = DOD_transform_handler->Components;
         auto& transforms = transform_handler->Components;
         auto& movements = movement_handler->Components;
 
@@ -183,12 +186,9 @@ struct movementSystem : public Systems
         for (size_t i = 0; i < min_size; ++i) {
             auto& transform = transforms[i];
             auto& movement = movements[i];
-
+            
             transform.PlayerPos += movement.Velocity * deltatime;
         }
-
-        
-        
     }
 
 };
@@ -199,12 +199,15 @@ struct HealthSystem : public Systems
     void Update(unsigned int ShaderProgram, component_manager& componentManager, float deltatime) override
     {  
         component_handler<health_component> *health = componentManager.get_component_handler<health_component>();
+        
         for (health_component &element : health->Components)
         {
-            if (element.health <= 0)
-            {
-                std::cout << "Entity is dead" << std::endl;
-            }
+            
+                if (element.health <= 0)
+                {
+                    std::cout << "Entity is dead" << std::endl;
+                }
+            
             }
         }
         
@@ -365,7 +368,17 @@ void Draw ( component_manager& componentManager) override
     
 }
 };
-
+struct gravity_system : public Systems
+{
+    void Update(unsigned int ShaderProgram, component_manager& componentManager, float deltatime) override
+    {
+        component_handler<movement_component> *movement = componentManager.get_component_handler<movement_component>();
+        for (movement_component &element : movement->Components)
+        {
+            element.Velocity.y = -9.8f ;
+        }
+    }
+};
 
 struct cube_system : public Systems
 {

@@ -12,6 +12,12 @@
 #include "Components.h"
 #include "ParticleSystem.h"
 
+extern "C"
+{
+#include "../lua54/include/lua.h"
+#include "../lua54/include/lauxlib.h"
+#include "../lua54/include/lualib.h"
+}
 
 Sphere sphere;
 Plane Plane;
@@ -24,6 +30,7 @@ component_manager componentManager;
 SystemManager systemManager;
 render_system renderSystem;
 collision_system collisionSystem;
+gravity_system gravitySystem;
 
 
 bool firstMouse = true;
@@ -36,12 +43,60 @@ void ProsessInput(GLFWwindow *window, float deltaTime, movement_component& MVM, 
 
 void CreateEnemy(int ID);
 
+void LoadAndRunSpawnBallsScript(lua_State* L) {
+    // Load and run the Lua script
+    if (luaL_dofile(L, "../spawnBalls.lua") != LUA_OK) {
+        // Print error if script fails to load or run
+        std::cerr << "Error running spawnBalls.lua: " 
+                  << lua_tostring(L, -1) << std::endl;
+    }
+}
+int LuaCreateEnemy(lua_State* L) {
+    // Check that we received an integer argument
+    int enemyID = luaL_checkinteger(L, 1);
+    
+    // Call the CreateEnemy function
+    CreateEnemy(enemyID);
+    
+    // No return values
+    return 0;
+}
+
+void SetupLuaBindings(lua_State* L) {
+    // Register the function so it can be called from Lua
+    lua_register(L, "CreateEnemy", LuaCreateEnemy);
+}
+lua_State* SetupLuaState() {
+    // Create a new Lua state
+    lua_State* L = luaL_newstate();
+    
+    // Load standard Lua libraries
+    luaL_openlibs(L);
+    
+    // Register the CreateEnemy function so it's callable from Lua
+    lua_register(L, "CreateEnemy", LuaCreateEnemy);
+    
+    return L;
+}
+
 struct Render {
 bool inside;
     bool isMovingForward;
     
     Render() = default;
     void render(GLFWwindow* window, unsigned int shaderProgram, float deltaTime, float lastFrame) {
+
+        static lua_State* L = SetupLuaState();
+    
+        // Register bindings only once
+        static bool bindingsSetup = false;
+        if (!bindingsSetup) {
+            SetupLuaBindings(L);
+            bindingsSetup = true;
+        }
+
+        // Load and run the Lua script
+        LoadAndRunSpawnBallsScript(L);
         
         renderSystem.CreateMeshes();
 
@@ -50,22 +105,19 @@ bool inside;
 
 
         particleSystem.SettupBuffers();
-     
         
-        /*Entity Player = entityManager.create_entity();
-        if (Player.ID == -1){std::cerr << "Failed to create entity." << std::endl;}
-        */
-
+        Entity Plane0(0);
+        Entity Player(1);
         
-        
-        Entity Player(0);
-        Entity Plane0(1);
         
 
-        CreateEnemy(2);
-        CreateEnemy(3);
+        std::vector<Entity> Balls;
+        Balls.emplace_back(1);
+        Balls.emplace_back(2);
+        Balls.emplace_back(3);
+        Balls.emplace_back(4);
+        Balls.emplace_back(5);
         
-
         
 
        
@@ -75,6 +127,7 @@ bool inside;
         systemManager.AddSystem<render_system>();
         systemManager.AddSystem<movementSystem>();
         systemManager.AddSystem<HealthSystem>();
+        systemManager.AddSystem<gravity_system>();
 
        // systemManager.AddSystem<test_system>(TestEntity.ID);
 
@@ -102,18 +155,11 @@ bool inside;
         
         
         
-        componentManager.getComponent<health_component>(2).health = 2;
-        componentManager.getComponent<model_component>(2).MeshName = "Sphere";
-        componentManager.getComponent<transform_component>(2).Scale =  glm::vec3(0.5, 0.5,0.5);
-        componentManager.getComponent<transform_component>(2).PlayerPos = glm::vec3(-3,0 , -2);
-
-
+        
+       
+        componentManager.getComponent<transform_component>(2).PlayerPos.x = 5.f;
         
         
-        componentManager.getComponent<health_component>(3).health = 2;
-        componentManager.getComponent<model_component>(3).MeshName = "Sphere";
-        componentManager.getComponent<transform_component>(3).Scale =  glm::vec3(0.5, 0.5,0.5);
-        componentManager.getComponent<transform_component>(3).PlayerPos = glm::vec3(3,0 , -2);
         
         componentManager.add_component<model_component>(Plane0.ID);
         componentManager.add_component<plane_component>(Plane0.ID);
@@ -146,16 +192,16 @@ bool inside;
        
         while (!glfwWindowShouldClose(window))
             {
-            particleSystem.emit( glm::vec3(0, 70, 0), glm::sphericalRand(8), glm::vec3(1, 0, 0), 20);
+            particleSystem.emit( glm::vec3(0, 70, 0), glm::sphericalRand(8), glm::vec3(1.f), 10);
             particleSystem.Update(deltaTime);
             
             
          
-            glm::vec3 Enemy0direction = glm::normalize(componentManager.getComponent<transform_component>(Player.ID).PlayerPos - componentManager.getComponent<transform_component>(2).PlayerPos);
+            /*glm::vec3 Enemy0direction = glm::normalize(componentManager.getComponent<transform_component>(Player.ID).PlayerPos - componentManager.getComponent<transform_component>(2).PlayerPos);
             componentManager.getComponent<movement_component>(2).Velocity = Enemy0direction * 0.5f;
 
             glm::vec3 Enemy1direction = glm::normalize(componentManager.getComponent<transform_component>(Player.ID).PlayerPos - componentManager.getComponent<transform_component>(3).PlayerPos);
-            componentManager.getComponent<movement_component>(3).Velocity = Enemy1direction * 0.5f;
+            componentManager.getComponent<movement_component>(3).Velocity = Enemy1direction * 0.5f;*/
 
            
             if (componentManager.getComponent<health_component>(Player.ID).health <= 0)
@@ -164,12 +210,21 @@ bool inside;
                 //break;
             }
 
-            
+           
+            std::cout<<"player velocity: "<<componentManager.getComponent<movement_component>(Player.ID).Velocity.y<<std::endl;
 
             EnemyPos[0] = componentManager.getComponent<transform_component>(2).PlayerPos;
             EnemyPos[1] = componentManager.getComponent<transform_component>(3).PlayerPos;
             
 
+            //if anny sphere y is less than plane y set y to plane y
+            for (int i = 1; i < Balls.size() +1; i++)
+            {
+                if (componentManager.getComponent<transform_component>(i).PlayerPos.y < componentManager.getComponent<transform_component>(Plane0.ID).PlayerPos.y)
+                {
+                    componentManager.getComponent<transform_component>(i).PlayerPos.y = 0.f;
+                }
+            }
             
             float currentFrame = glfwGetTime();
             deltaTime = currentFrame - lastFrame;
@@ -201,10 +256,9 @@ bool inside;
             //systemManager.UpdateSystems<render_system>(shaderProgram, componentManager);
             renderSystem.Update(shaderProgram, componentManager, deltaTime);
             systemManager.UpdateSystems<matrix_system>(shaderProgram, componentManager, deltaTime);
-            
+            gravitySystem.Update(shaderProgram, componentManager, deltaTime);
             systemManager.UpdateSystems<movementSystem>(shaderProgram,componentManager, deltaTime);
             collisionSystem.Update(shaderProgram, componentManager, deltaTime);
-            
             glfwSwapBuffers(window);
             glfwPollEvents();
             }
@@ -310,5 +364,9 @@ inline void CreateEnemy(int ID)
     componentManager.add_component<sphere_component>(Enemy.ID);
     componentManager.add_component<matrix_component>(Enemy.ID);
     componentManager.add_component<health_component>(Enemy.ID);
+    componentManager.getComponent<model_component>(Enemy.ID).MeshName = "Sphere";
+    componentManager.getComponent<health_component>(Enemy.ID).health = 2;
+    componentManager.getComponent<transform_component>(Enemy.ID).Scale =  glm::vec3(0.5, 0.5,0.5);
+    componentManager.getComponent<transform_component>(Enemy.ID).PlayerPos = glm::vec3(ID,10.f ,0.f);
 }
 
