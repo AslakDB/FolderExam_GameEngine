@@ -100,8 +100,14 @@ struct DOD_transform_component : public Components
 struct movement_component : public Components
 {
     glm::vec3 Velocity = glm::vec3(0.f);
-    float speed = 0.f;
+    
 };
+
+struct DOD_movement_component : public Components
+{
+    std::vector<glm::vec3> Velocity;
+};
+
 
 struct health_component : public Components
 {

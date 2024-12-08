@@ -96,7 +96,7 @@ bool inside;
         }
 
         // Load and run the Lua script
-        LoadAndRunSpawnBallsScript(L);
+        
         
         renderSystem.CreateMeshes();
 
@@ -196,7 +196,7 @@ bool inside;
             particleSystem.Update(deltaTime);
             
             
-         
+            LoadAndRunSpawnBallsScript(L);  
             /*glm::vec3 Enemy0direction = glm::normalize(componentManager.getComponent<transform_component>(Player.ID).PlayerPos - componentManager.getComponent<transform_component>(2).PlayerPos);
             componentManager.getComponent<movement_component>(2).Velocity = Enemy0direction * 0.5f;
 

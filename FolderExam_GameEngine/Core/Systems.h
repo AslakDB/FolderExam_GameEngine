@@ -175,19 +175,21 @@ struct movementSystem : public Systems
         auto* transform_handler = componentManager.get_component_handler<transform_component>();
         auto* movement_handler = componentManager.get_component_handler<movement_component>();
         auto* DOD_transform_handler = componentManager.get_component_handler<DOD_transform_component>();
+        auto* DOD_movement_handler = componentManager.get_component_handler<DOD_movement_component>();
         
 
         auto& DOD_transforms = DOD_transform_handler->Components;
+        auto& DOD_movements = DOD_movement_handler->Components;
         auto& transforms = transform_handler->Components;
         auto& movements = movement_handler->Components;
 
         size_t min_size = std::min(transforms.size(), movements.size());
 
         for (size_t i = 0; i < min_size; ++i) {
-            auto& transform = transforms[i];
-            auto& movement = movements[i];
+            auto& DOD_transform = transforms[i];
+            auto& DOD_movement = movements[i];
             
-            transform.PlayerPos += movement.Velocity * deltatime;
+            DOD_transform.PlayerPos += DOD_movement.Velocity * deltatime;
         }
     }
 
