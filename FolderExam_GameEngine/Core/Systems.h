@@ -174,22 +174,22 @@ struct movementSystem : public Systems
     {
         auto* transform_handler = componentManager.get_component_handler<transform_component>();
         auto* movement_handler = componentManager.get_component_handler<movement_component>();
-        auto* DOD_transform_handler = componentManager.get_component_handler<DOD_transform_component>();
-        auto* DOD_movement_handler = componentManager.get_component_handler<DOD_movement_component>();
+        /*auto* DOD_transform_handler = componentManager.get_component_handler<DOD_transform_component>();
+        auto* DOD_movement_handler = componentManager.get_component_handler<DOD_movement_component>();*/
         
 
-        auto& DOD_transforms = DOD_transform_handler->Components;
-        auto& DOD_movements = DOD_movement_handler->Components;
+        /*auto& DOD_transforms = DOD_transform_handler->Components;
+        auto& DOD_movements = DOD_movement_handler->Components;*/
         auto& transforms = transform_handler->Components;
         auto& movements = movement_handler->Components;
 
         size_t min_size = std::min(transforms.size(), movements.size());
 
         for (size_t i = 0; i < min_size; ++i) {
-            auto& DOD_transform = transforms[i];
-            auto& DOD_movement = movements[i];
+            auto& transform = transforms[i];
+            auto& movement = movements[i];
             
-            DOD_transform.PlayerPos += DOD_movement.Velocity * deltatime;
+            transform.PlayerPos += movement.Velocity * deltatime;
         }
     }
 
@@ -212,10 +212,24 @@ struct HealthSystem : public Systems
             
             }
         }
-        
-    
 };
 
+struct DOD_HealthSystem : public Systems
+{
+    void Update(unsigned int ShaderProgram, component_manager& componentManager, float deltatime) override
+    {
+        component_handler<DOD_health_component>* healthHandler = componentManager.get_component_handler<DOD_health_component>();
+        for (DOD_health_component& healthComp : healthHandler->Components)
+        {
+            for (int& health : healthComp.health)
+            {
+                // Example logic: reduce health over time
+                health -= 1 * deltatime;
+                if (health < 0) std::cout<<"Entity is dead"<<std::endl;
+            }
+        }
+    }
+};
 
 struct matrix_system : public Systems
 {

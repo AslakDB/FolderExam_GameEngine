@@ -37,7 +37,6 @@ struct collision_component : public Components
 
 struct collision_system : public Systems
 {
-    
         void SphereSphereCollision(component_manager& componentManager)
         {
             auto* collision = componentManager.get_component_handler<collision_component>();
@@ -60,14 +59,14 @@ struct collision_system : public Systems
                     coll[i].radiusSumSquared = coll[i].radiusSum * coll[i].radiusSum;
 
                     if (coll[i].distanceSquared < coll[i].radiusSumSquared) {
-                        std::cout << "BallCollisionSystem thingy" << '\n';
+                        std::cout << "Collision" << '\n';
                         coll[i].collisionNormal = glm::normalize(coll[i].distanceVector);
                         glm::vec3 relativeVelocity = movements[i].Velocity - movements[j].Velocity;
                         float velocityAlongNormal = glm::dot(relativeVelocity, coll[i].collisionNormal);
                         if (velocityAlongNormal < 0) {
                             glm::vec3 impulse = (-(1.0f + 1.0f) * velocityAlongNormal * coll[i].collisionNormal);
-                            movements[i].Velocity += impulse;
-                            movements[j].Velocity -= impulse;
+                            movements[i].Velocity += impulse * 0.8f;
+                            movements[j].Velocity -= impulse * 0.8f;
                         }
                     }
                 }

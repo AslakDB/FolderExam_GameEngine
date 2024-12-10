@@ -13,7 +13,7 @@ public:
     void SettupBuffers();
 
 private:
-    std::vector<glm::vec3> Possision;
+    std::vector<glm::vec3> Position;
     std::vector<glm::vec3> Velocities;
     std::vector<glm::vec3> Colours;
     std::vector<float> Lifespan;

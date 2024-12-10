@@ -31,6 +31,7 @@ SystemManager systemManager;
 render_system renderSystem;
 collision_system collisionSystem;
 gravity_system gravitySystem;
+DOD_HealthSystem DOD_healthSystem;
 
 
 bool firstMouse = true;
@@ -41,7 +42,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
 void ProsessInput(GLFWwindow *window, float deltaTime, movement_component& MVM, Entity& Player);
 
-void CreateEnemy(int ID);
+void CreateBall(int ID);
 
 void LoadAndRunSpawnBallsScript(lua_State* L) {
     // Load and run the Lua script
@@ -51,12 +52,12 @@ void LoadAndRunSpawnBallsScript(lua_State* L) {
                   << lua_tostring(L, -1) << std::endl;
     }
 }
-int LuaCreateEnemy(lua_State* L) {
+int LuaCreateBall(lua_State* L) {
     // Check that we received an integer argument
     int enemyID = luaL_checkinteger(L, 1);
     
     // Call the CreateEnemy function
-    CreateEnemy(enemyID);
+    CreateBall(enemyID);
     
     // No return values
     return 0;
@@ -64,7 +65,7 @@ int LuaCreateEnemy(lua_State* L) {
 
 void SetupLuaBindings(lua_State* L) {
     // Register the function so it can be called from Lua
-    lua_register(L, "CreateEnemy", LuaCreateEnemy);
+    lua_register(L, "CreateEnemy", LuaCreateBall);
 }
 lua_State* SetupLuaState() {
     // Create a new Lua state
@@ -74,7 +75,7 @@ lua_State* SetupLuaState() {
     luaL_openlibs(L);
     
     // Register the CreateEnemy function so it's callable from Lua
-    lua_register(L, "CreateEnemy", LuaCreateEnemy);
+    lua_register(L, "CreateEnemy", LuaCreateBall);
     
     return L;
 }
@@ -101,15 +102,15 @@ bool inside;
         renderSystem.CreateMeshes();
 
         std::vector<glm::vec3> EnemyPos;
-        std::vector<Entity> Enemies;
+        
 
 
         particleSystem.SettupBuffers();
         
-        Entity Plane0(0);
-        Entity Player(1);
         
         
+        
+        LoadAndRunSpawnBallsScript(L);  
 
         std::vector<Entity> Balls;
         Balls.emplace_back(1);
@@ -118,7 +119,7 @@ bool inside;
         Balls.emplace_back(4);
         Balls.emplace_back(5);
         
-        
+        Entity Plane0(0);
 
        
         systemManager.AddSystem<matrix_system>();
@@ -131,17 +132,22 @@ bool inside;
 
        // systemManager.AddSystem<test_system>(TestEntity.ID);
 
-        
+        Entity Player(1);
         // Add components
         componentManager.add_component<model_component>(Player.ID);
-        componentManager.add_component<health_component>(Player.ID);
+        //componentManager.add_component<health_component>(Player.ID);
+        
+        componentManager.add_component<DOD_health_component>(Player.ID);
+        DOD_health_component& healthComp = componentManager.getComponent<DOD_health_component>(Player.ID);
+        healthComp.health.push_back(100); // Add a health value
+         // Modify the health value;
         componentManager.add_component<transform_component>(Player.ID);
         componentManager.add_component<collision_component>(Player.ID);
-        
         componentManager.add_component<movement_component>(Player.ID);
         componentManager.add_component<mesh_component>(Player.ID);
         componentManager.add_component<sphere_component>(Player.ID);
         componentManager.add_component<matrix_component>(Player.ID);
+        
         componentManager.getComponent<model_component>(Player.ID).MeshName = "Sphere";
         componentManager.getComponent<model_component>(Player.ID).colour = glm::vec3(1,0,0);
         componentManager.getComponent<health_component>(Player.ID).health = 3;
@@ -154,7 +160,7 @@ bool inside;
 
         
         
-        
+         
         
        
         componentManager.getComponent<transform_component>(2).PlayerPos.x = 5.f;
@@ -165,7 +171,7 @@ bool inside;
         componentManager.add_component<plane_component>(Plane0.ID);
         // componentManager.add_component<mesh_component>(Plane0.ID);
         componentManager.add_component<transform_component>(Plane0.ID);
-        // componentManager.add_component<movement_component>(Plane0.ID);
+       // componentManager.add_component<movement_component>(Plane0.ID);
         componentManager.add_component<matrix_component>(Plane0.ID);
 
         
@@ -180,8 +186,7 @@ bool inside;
         sphereHandler->Components[sphereHandler->index[Player.ID]].radius = 0.5f;
       
         
-     Enemies.emplace_back(2);
-        Enemies.emplace_back(3);
+     
 
         glm::mat4 trans = glm::mat4(1.0f);
         glm::mat4 projection;
@@ -192,29 +197,16 @@ bool inside;
        
         while (!glfwWindowShouldClose(window))
             {
-            particleSystem.emit( glm::vec3(0, 70, 0), glm::sphericalRand(8), glm::vec3(1.f), 10);
-            particleSystem.Update(deltaTime);
             
             
-            LoadAndRunSpawnBallsScript(L);  
-            /*glm::vec3 Enemy0direction = glm::normalize(componentManager.getComponent<transform_component>(Player.ID).PlayerPos - componentManager.getComponent<transform_component>(2).PlayerPos);
-            componentManager.getComponent<movement_component>(2).Velocity = Enemy0direction * 0.5f;
-
-            glm::vec3 Enemy1direction = glm::normalize(componentManager.getComponent<transform_component>(Player.ID).PlayerPos - componentManager.getComponent<transform_component>(3).PlayerPos);
-            componentManager.getComponent<movement_component>(3).Velocity = Enemy1direction * 0.5f;*/
-
-           
+            
+           // LoadAndRunSpawnBallsScript(L);  
+                       
             if (componentManager.getComponent<health_component>(Player.ID).health <= 0)
             {
                 std::cout << "Player is dead" << std::endl;
                 //break;
             }
-
-           
-            std::cout<<"player velocity: "<<componentManager.getComponent<movement_component>(Player.ID).Velocity.y<<std::endl;
-
-            EnemyPos[0] = componentManager.getComponent<transform_component>(2).PlayerPos;
-            EnemyPos[1] = componentManager.getComponent<transform_component>(3).PlayerPos;
             
 
             //if anny sphere y is less than plane y set y to plane y
@@ -246,15 +238,17 @@ bool inside;
             glUniform3fv(viewLoc, 1, glm::value_ptr(camera.cameraPos));
 
             int LightLoc = glGetUniformLocation(shaderProgram, "lightPos");
-            glUniform3fv(LightLoc, 1, glm::value_ptr(glm::vec3(0,10,0)));
+            glUniform3fv(LightLoc, 1, glm::value_ptr(glm::vec3(0,50,0)));
 
             glPointSize(5);
             glLineWidth(3);
             
-
+            particleSystem.emit( glm::vec3(0, 45, 0), glm::sphericalRand(8.f), glm::vec3(1.f,1.f,1.f), 10);
+            particleSystem.Update(deltaTime);
             particleSystem.render(shaderProgram);
             //systemManager.UpdateSystems<render_system>(shaderProgram, componentManager);
             renderSystem.Update(shaderProgram, componentManager, deltaTime);
+            DOD_healthSystem.Update(shaderProgram, componentManager, deltaTime);
             systemManager.UpdateSystems<matrix_system>(shaderProgram, componentManager, deltaTime);
             gravitySystem.Update(shaderProgram, componentManager, deltaTime);
             systemManager.UpdateSystems<movementSystem>(shaderProgram,componentManager, deltaTime);
@@ -307,6 +301,11 @@ void ProsessInput(GLFWwindow *window, float deltaTime, movement_component& MVM, 
         glfwSetWindowShouldClose(window, true);
 
     float cameraSpeed = 2.5f * deltaTime ;
+
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    {
+        cameraSpeed = 7.5f * deltaTime ;
+    }
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
         camera.cameraPos += cameraSpeed * cameraFrontXZ;
@@ -332,6 +331,7 @@ void ProsessInput(GLFWwindow *window, float deltaTime, movement_component& MVM, 
             std::cout << "Player health: " << componentManager.getComponent<health_component>(Player.ID).health << std::endl;
         }
 
+   
     
     
     if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
@@ -353,20 +353,20 @@ void ProsessInput(GLFWwindow *window, float deltaTime, movement_component& MVM, 
     }
 }
 
-inline void CreateEnemy(int ID)
+inline void CreateBall(int ID)
 {
-    Entity Enemy(ID);
-    componentManager.add_component<model_component>(Enemy.ID);
-    componentManager.add_component<transform_component>(Enemy.ID);
-    componentManager.add_component<movement_component>(Enemy.ID);
-    componentManager.add_component<collision_component>(Enemy.ID);
-    componentManager.add_component<mesh_component>(Enemy.ID);
-    componentManager.add_component<sphere_component>(Enemy.ID);
-    componentManager.add_component<matrix_component>(Enemy.ID);
-    componentManager.add_component<health_component>(Enemy.ID);
-    componentManager.getComponent<model_component>(Enemy.ID).MeshName = "Sphere";
-    componentManager.getComponent<health_component>(Enemy.ID).health = 2;
-    componentManager.getComponent<transform_component>(Enemy.ID).Scale =  glm::vec3(0.5, 0.5,0.5);
-    componentManager.getComponent<transform_component>(Enemy.ID).PlayerPos = glm::vec3(ID,10.f ,0.f);
+    Entity Ball(ID);
+    componentManager.add_component<model_component>(Ball.ID);
+    componentManager.add_component<transform_component>(Ball.ID);
+    componentManager.add_component<movement_component>(Ball.ID);
+    componentManager.add_component<collision_component>(Ball.ID);
+    componentManager.add_component<mesh_component>(Ball.ID);
+    componentManager.add_component<sphere_component>(Ball.ID);
+    componentManager.add_component<matrix_component>(Ball.ID);
+    componentManager.add_component<health_component>(Ball.ID);
+    componentManager.getComponent<model_component>(Ball.ID).MeshName = "Sphere";
+    componentManager.getComponent<health_component>(Ball.ID).health = 2;
+    componentManager.getComponent<transform_component>(Ball.ID).Scale =  glm::vec3(0.5, 0.5,0.5);
+    componentManager.getComponent<transform_component>(Ball.ID).PlayerPos = glm::vec3(ID,10.f ,0.f);
 }
 

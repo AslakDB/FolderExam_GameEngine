@@ -90,12 +90,7 @@ struct transform_component : public Components
     glm::vec3 Rotation = glm::vec3(0.f);
 };
 
-struct DOD_transform_component : public Components
-{
-    std::vector<glm::vec3> PlayerPos;
-    std::vector<glm::vec3> Scale;
-    std::vector<glm::vec3> Rotation;
-};
+
 
 struct movement_component : public Components
 {
@@ -103,15 +98,15 @@ struct movement_component : public Components
     
 };
 
-struct DOD_movement_component : public Components
-{
-    std::vector<glm::vec3> Velocity;
-};
-
 
 struct health_component : public Components
 {
    int health;
+};
+
+struct DOD_health_component : public Components
+{
+    std::vector<int> health;
 };
 
 struct matrix_component : public Components

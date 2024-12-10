@@ -32,7 +32,7 @@ vec3 specular = specularStrength * spec * lightColor;
 float diff = max(dot(norm, lightDir), 0.0);
 vec3 diffuse = diff * lightColor;
 
-float ambientStrength = 0.2;
+float ambientStrength = 0.3;
     vec3 ambient = ambientStrength * lightColor;
 
     vec3 result = (ambient +diffuse + specular) * ourColor;
