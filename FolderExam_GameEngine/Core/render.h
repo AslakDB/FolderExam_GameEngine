@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <algorithm>
 #include <glm/gtc/random.hpp>
 #include "Camera.h"
 #include "Model.h"
@@ -40,9 +41,9 @@ float lastX = 960, lastY = 540;
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
-void ProsessInput(GLFWwindow *window, float deltaTime, movement_component& MVM, Entity& Player);
+void ProsessInput(GLFWwindow *window, float deltaTime, movement_component& MVM, Entity& Player, lua_State* L);
 
-void CreateBall(int ID);
+void CreateBall(int ID, float size);
 
 void LoadAndRunSpawnBallsScript(lua_State* L) {
     // Load and run the Lua script
@@ -55,9 +56,9 @@ void LoadAndRunSpawnBallsScript(lua_State* L) {
 int LuaCreateBall(lua_State* L) {
     // Check that we received an integer argument
     int enemyID = luaL_checkinteger(L, 1);
-    
+    float ballSize = luaL_checknumber(L, 2);
     // Call the CreateEnemy function
-    CreateBall(enemyID);
+    CreateBall(enemyID, ballSize);
     
     // No return values
     return 0;
@@ -111,16 +112,12 @@ bool inside;
         
         
         LoadAndRunSpawnBallsScript(L);  
-
-        std::vector<Entity> Balls;
-        Balls.emplace_back(1);
-        Balls.emplace_back(2);
-        Balls.emplace_back(3);
-        Balls.emplace_back(4);
-        Balls.emplace_back(5);
+        
+       
         
         Entity Plane0(0);
-
+        CreateBall(2, 0.5f);
+        CreateBall(3, 0.5f);
        
         systemManager.AddSystem<matrix_system>();
         //systemManager.AddSystem<collision_system>();
@@ -198,9 +195,11 @@ bool inside;
         while (!glfwWindowShouldClose(window))
             {
             
+            auto& planeTransform = componentManager.getComponent<transform_component>(Plane0.ID);
+            planeTransform.PlayerPos.y = std::max<float>(planeTransform.PlayerPos.y, 0);
+            planeTransform.PlayerPos.x = std::max<float>(planeTransform.PlayerPos.x, 0);
+            planeTransform.PlayerPos.z = std::max<float>(planeTransform.PlayerPos.z, 0);
             
-            
-           // LoadAndRunSpawnBallsScript(L);  
                        
             if (componentManager.getComponent<health_component>(Player.ID).health <= 0)
             {
@@ -208,20 +207,12 @@ bool inside;
                 //break;
             }
             
-
-            //if anny sphere y is less than plane y set y to plane y
-            for (int i = 1; i < Balls.size() +1; i++)
-            {
-                if (componentManager.getComponent<transform_component>(i).PlayerPos.y < componentManager.getComponent<transform_component>(Plane0.ID).PlayerPos.y)
-                {
-                    componentManager.getComponent<transform_component>(i).PlayerPos.y = 0.f;
-                }
-            }
+            
             
             float currentFrame = glfwGetTime();
             deltaTime = currentFrame - lastFrame;
             lastFrame = currentFrame;
-            ProsessInput(window, deltaTime, componentManager.getComponent<movement_component>(Player.ID) , Player);
+            ProsessInput(window, deltaTime, componentManager.getComponent<movement_component>(Player.ID) , Player, L);
             
             
             //systemManager.UpdateSystems<model_system>(shaderProgram,componentManager);
@@ -293,7 +284,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 }
 
 
-void ProsessInput(GLFWwindow *window, float deltaTime, movement_component& MVM, Entity& Player)
+void ProsessInput(GLFWwindow *window, float deltaTime, movement_component& MVM, Entity& Player, lua_State* L)
 {
     glm::vec3 cameraFrontXZ = glm::normalize(glm::vec3(camera.cameraFront.x, 0.0f, camera.cameraFront.z));
 
@@ -331,8 +322,10 @@ void ProsessInput(GLFWwindow *window, float deltaTime, movement_component& MVM, 
             std::cout << "Player health: " << componentManager.getComponent<health_component>(Player.ID).health << std::endl;
         }
 
-   
-    
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+    {
+        LoadAndRunSpawnBallsScript(L);
+    }
     
     if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
     {
@@ -351,9 +344,10 @@ void ProsessInput(GLFWwindow *window, float deltaTime, movement_component& MVM, 
     } else {
         MVM.Velocity = glm::vec3(0, 0, 0);
     }
+    
 }
 
-inline void CreateBall(int ID)
+inline void CreateBall(int ID, float size)
 {
     Entity Ball(ID);
     componentManager.add_component<model_component>(Ball.ID);
@@ -366,7 +360,8 @@ inline void CreateBall(int ID)
     componentManager.add_component<health_component>(Ball.ID);
     componentManager.getComponent<model_component>(Ball.ID).MeshName = "Sphere";
     componentManager.getComponent<health_component>(Ball.ID).health = 2;
-    componentManager.getComponent<transform_component>(Ball.ID).Scale =  glm::vec3(0.5, 0.5,0.5);
+    componentManager.getComponent<transform_component>(Ball.ID).Scale =  glm::vec3(size);
     componentManager.getComponent<transform_component>(Ball.ID).PlayerPos = glm::vec3(ID,10.f ,0.f);
+    
 }
 

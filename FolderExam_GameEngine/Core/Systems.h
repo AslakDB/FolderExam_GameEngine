@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include <algorithm>
 #include <set>
 #include <unordered_map>
 
@@ -190,6 +191,8 @@ struct movementSystem : public Systems
             auto& movement = movements[i];
             
             transform.PlayerPos += movement.Velocity * deltatime;
+
+            transform.PlayerPos.y = std::max<float>(transform.PlayerPos.y, 0);
         }
     }
 
