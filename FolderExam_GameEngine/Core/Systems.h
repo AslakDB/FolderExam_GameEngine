@@ -221,10 +221,10 @@ struct DOD_HealthSystem : public Systems
         component_handler<DOD_health_component>* healthHandler = componentManager.get_component_handler<DOD_health_component>();
         for (DOD_health_component& healthComp : healthHandler->Components)
         {
-            for (int& health : healthComp.health)
+            for (float& health : healthComp.health)
             {
                 // Example logic: reduce health over time
-                health -= 1 * deltatime;
+                health -= 10 * deltatime;
                 if (health < 0) std::cout<<"Entity is dead"<<std::endl;
             }
         }

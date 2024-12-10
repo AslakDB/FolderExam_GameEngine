@@ -105,8 +105,8 @@ struct health_component : public Components
 };
 
 struct DOD_health_component : public Components
-{
-    std::vector<int> health;
+{   
+    std::vector<float> health;
 };
 
 struct matrix_component : public Components
